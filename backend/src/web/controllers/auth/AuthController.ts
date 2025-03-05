@@ -1,21 +1,25 @@
 import { Request, Response } from 'express';
 import { AuthUseCase } from '../../../application/use-cases/auth/AuthUseCase';
-import { ResponseModelDTO } from '../../../domain/dtos/ResponseModelDTO';
 
 export class AuthController {
     constructor(private authUseCase: AuthUseCase) {}
 
-    async login(request: Request, response: Response): Promise<Response> {
+    async login(request: Request, response): Promise<Response> {
         try {
             const { email, password } = request.body;
 
-            const { token } = await this.authUseCase.execute(email, password);
+            if (!email || !password) {
+                return response.sendError('Email e senha são obrigatórios', 400);
+            }
 
-            const responseDto = ResponseModelDTO.success(token);
-            return response.status(responseDto.getStatus()).json(responseDto.toJSON());
+            const { user, token } = await this.authUseCase.execute(email, password);
+
+            return response.sendSuccess({ user, token }, 200);
         } catch (error) {
-            const responseDto = ResponseModelDTO.error(error instanceof Error ? error.message : 'Unexpected error');
-            return response.status(responseDto.getStatus()).json(responseDto.toJSON());
+            return response.sendError(
+                error instanceof Error ? error.message : 'Erro inesperado',
+                400
+            );
         }
     }
 } 

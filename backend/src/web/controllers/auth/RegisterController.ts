@@ -1,17 +1,15 @@
 import { Request, Response } from 'express';
 import { RegisterUseCase } from '../../../application/use-cases/auth/RegisterUseCase';
-import { ResponseModelDTO } from '../../../domain/dtos/ResponseModelDTO';
 
 export class RegisterController {
     constructor(private registerUseCase: RegisterUseCase) {}
 
-    async handle(request: Request, response: Response): Promise<Response> {
+    async handle(request: Request, response): Promise<Response> {
         try {
             const { name, email, password, cpf, role } = request.body;
 
             if (!name || !email || !password || !cpf || !role) {
-                const responseDto = ResponseModelDTO.error('Todos os campos são obrigatórios');
-                return response.status(responseDto.getStatus()).json(responseDto.toJSON());
+                return response.sendError('Nome, email, senha e CPF são obrigatórios', 400);
             }
 
             const { user, token } = await this.registerUseCase.execute({
@@ -22,11 +20,12 @@ export class RegisterController {
                 role
             });
 
-            const responseDto = ResponseModelDTO.success({ user, token });
-            return response.status(responseDto.getStatus()).json(responseDto.toJSON());
+            return response.sendSuccess({ user, token }, 201);
         } catch (error) {
-            const responseDto = ResponseModelDTO.error(error instanceof Error ? error.message : 'Erro inesperado');
-            return response.status(responseDto.getStatus()).json(responseDto.toJSON());
+            return response.sendError(
+                error instanceof Error ? error.message : 'Erro inesperado',
+                400
+            );
         }
     }
 } 

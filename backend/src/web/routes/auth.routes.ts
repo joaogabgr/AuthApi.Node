@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { AuthController } from '../controllers/auth/AuthController';
-import { RegisterController } from '../controllers/auth/RegisterController';
 import { AuthUseCase } from '../../application/use-cases/auth/AuthUseCase';
 import { RegisterUseCase } from '../../application/use-cases/auth/RegisterUseCase';
 import { UserRepository } from '../../infrastructure/repositories/UserRepository';
+import { AuthController } from '../controllers/auth/AuthController';
+import { RegisterController } from '../controllers/auth/RegisterController';
 
 const authRoutes = Router();
 const userRepository = new UserRepository();

@@ -4,7 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import { initializeDatabase } from './infrastructure/database/initialize';
 import { authRoutes } from './web/routes/auth.routes';
-import { responseHandler } from './interfaces/middlewares/responseHandler';
+import { responseHandler } from './infrastructure/middlewares/responseHandler';
 
 async function bootstrap() {
     const app = express();

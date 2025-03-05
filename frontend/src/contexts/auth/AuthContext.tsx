@@ -23,15 +23,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, senha: string) => {
     try {
-      console.log(email, senha);
-  
       const response = await api.post('/auth/login', {
         email: email,
         password: senha
       });
   
-      const token = response.data.model;
-      console.log(token);
+      const token = response.data.model.token;
   
       if (!token) {
         throw new Error("Token inválido ou inexistente");
@@ -39,7 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   
       api.defaults.headers["Authorization"] = `Bearer ${token}`;
       localStorage.setItem('token', token);
-  
+      
       const decodedToken: any = jwtDecode(token);
   
       const name = decodedToken?.name || "Usuário desconhecido";
@@ -67,12 +64,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
+        if (!token.includes('.') || token.split('.').length !== 3) {
+          throw new Error("Token inválido");
+        }
+        
         const decodedToken: any = jwtDecode(token);
         if (decodedToken.exp * 1000 < Date.now()) {
           throw new Error("Token expirado");
         }
-              console.log(decodedToken);
-
         api.defaults.headers["Authorization"] = `Bearer ${token}`;
 
         const name = decodedToken?.name || "Usuário desconhecido";
@@ -85,6 +84,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } catch (error) {
         console.error("Erro ao validar token:", error);
         setIsAuthenticated(false);
+        localStorage.removeItem('token');
       }
     }
   }, []);
